@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgres://postgres:qwerty123@db:5432/url_shortener?sslmode=disable
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=qwerty123
+      - POSTGRES_DB=url_shortener
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
