@@ -13,20 +13,32 @@ import (
 	"url-shortener/internal/handlers"
 	"url-shortener/internal/repository"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/sethvargo/go-envconfig"
 )
 
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "qwerty123"
-	dbname   = "url_shortener"
-)
+type Config struct {
+	Host     string `env:"HOST"`
+	Port     string `env:"PORT"`
+	User     string `env:"USER"`
+	Password string `env:"PASSWORD"`
+	Dbname   string `env:"DBNAME"`
+}
 
 func main() {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Предупреждение: не удалось загрузить .env файл: %v", err)
+	}
+
+	var conf Config
+	ctx := context.Background()
+	if err := envconfig.Process(ctx, &conf); err != nil {
+		log.Fatal(err)
+	}
+
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		conf.Host, conf.Port, conf.User, conf.Password, conf.Dbname)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
